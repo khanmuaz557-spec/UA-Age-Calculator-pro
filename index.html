@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0f766e">
+<title>ChronoPulse – বয়স ক্যালকুলেটর</title>
+<script>window.confetti=function(o){var c=document.createElement("canvas");c.style.cssText="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99";c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);var g=c.getContext("2d"),n=o.particleCount||100,sp=(o.spread||60)*Math.PI/180,oy=((o.origin&&o.origin.y)||.6)*c.height,cols=["#0f766e","#4338ca","#be123c","#b45309","#0ea5e9"],ps=[];for(var i=0;i<n;i++){var a=-Math.PI/2+(Math.random()-.5)*sp,v=8+Math.random()*10;ps.push({x:c.width/2,y:oy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:3+Math.random()*4,c:cols[i%5]});}var f=0;(function t(){g.clearRect(0,0,c.width,c.height);ps.forEach(function(p){p.vy+=.35;p.x+=p.vx;p.y+=p.vy;g.fillStyle=p.c;g.fillRect(p.x,p.y,p.r,p.r*1.6)});if(++f<110)requestAnimationFrame(t);else c.remove();})();};
+</script>
+<style>
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --surface2:#eef1f6; --text:#0f172a; --muted:#566178; --line:#dde2eb;
+  --a-l:#0f766e; --a-d:#5eead4; --a:var(--a-l); --on-a:#ffffff; --err:#b91c1c; --shadow:0 1px 2px rgba(15,23,42,.06),0 12px 32px rgba(15,23,42,.08);
+  color-scheme:light;
+}
+:root[data-accent="indigo"]{--a-l:#4338ca;--a-d:#a5b4fc}
+:root[data-accent="rose"]{--a-l:#be123c;--a-d:#fda4af}
+:root[data-accent="amber"]{--a-l:#b45309;--a-d:#fcd34d}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1020; --surface:#131a2e; --surface2:#1a2340; --text:#e8ecf6; --muted:#9aa6c0; --line:#26304f;
+    --a:var(--a-d); --on-a:#0b1020; --err:#fca5a5; --shadow:0 12px 32px rgba(0,0,0,.45); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1020; --surface:#131a2e; --surface2:#1a2340; --text:#e8ecf6; --muted:#9aa6c0; --line:#26304f;
+  --a:var(--a-d); --on-a:#0b1020; --err:#fca5a5; --shadow:0 12px 32px rgba(0,0,0,.45); color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--text);font-family:'Hind Siliguri','Noto Sans Bengali','Segoe UI',system-ui,sans-serif;font-size:16px;line-height:1.5;display:flex;justify-content:center;padding:20px 14px 32px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.app{width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-weight:700;font-size:1.15rem;letter-spacing:.2px}
+.brand small{display:block;font-weight:400;font-size:.8rem;color:var(--muted)}
+.tools{display:flex;align-items:center;gap:8px}
+.chip{min-height:36px;min-width:36px;padding:0 12px;border:1px solid var(--line);background:var(--surface);border-radius:999px;cursor:pointer;font-size:.85rem;font-weight:600}
+.chip:hover{background:var(--surface2)}
+.swatches{display:flex;gap:6px;padding:0 4px}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--text)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+label{display:block;font-size:.9rem;font-weight:600;margin-bottom:6px}
+input[type=datetime-local]{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);font-size:1rem}
+.hint{font-size:.8rem;color:var(--muted);margin-top:6px}
+.err{color:var(--err);font-size:.88rem;font-weight:600;margin-top:8px;min-height:1.3em}
+.go{width:100%;min-height:48px;margin-top:10px;border:0;border-radius:10px;background:var(--a);color:var(--on-a);font-weight:700;font-size:1rem;cursor:pointer}
+.go:active{transform:translateY(1px)}
+#out[hidden]{display:none}
+#out{display:flex;flex-direction:column;gap:14px}
+.hero{text-align:center;padding:26px 18px}
+.hero .big{font-size:4.2rem;line-height:1;font-weight:700;color:var(--a);font-variant-numeric:tabular-nums}
+.hero .unit{font-size:1.05rem;color:var(--muted);margin-top:2px}
+.hero .rest{font-size:1.15rem;font-weight:600;margin-top:10px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);margin-top:12px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--a);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stat span{font-size:.82rem;color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;margin-bottom:6px}
+.tab{flex:1;white-space:nowrap;min-height:42px;padding:0 12px;border:0;background:none;color:var(--muted);font-weight:600;font-size:.9rem;cursor:pointer;border-bottom:3px solid transparent}
+.tab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--a)}
+.row{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.row:last-child{border-bottom:0}
+.row span{color:var(--muted)}
+.row b{text-align:right;font-weight:600}
+.note{font-size:.78rem;color:var(--muted);margin-top:8px}
+.actions{display:flex;gap:10px}
+.actions .chip{flex:1;border-radius:10px;min-height:44px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:90vw}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text);padding:18px;width:min(560px,calc(100vw - 24px));max-height:92vh;overflow:auto;box-shadow:var(--shadow);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h2{font-size:1.1rem;margin-bottom:10px}
+dialog canvas{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);display:block}
+dialog input[type=text]{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);margin:6px 0 12px}
+.dlgActions{display:flex;gap:10px}
+.dlgActions .go{margin-top:0;flex:2}
+.dlgActions .chip{flex:1;border-radius:10px;min-height:48px}
+@media (prefers-reduced-motion:reduce){.live i{animation:none}.toast{transition:none}}
+@media (max-width:360px){.hero .big{font-size:3.4rem}}
+#people input[type=text]{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);min-width:0}
+.ppl{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.ppl .open{flex:1;text-align:left;background:none;border:0;cursor:pointer;min-height:44px}
+.ppl small{display:block;color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="bar">
+    <div class="brand"><span data-i="title">ChronoPulse</span><small data-i="sub"></small></div>
+    <div class="tools">
+      <div class="swatches" role="group" aria-label="Accent color" id="swatches"></div>
+      <button class="chip" id="modeBtn" type="button" aria-label="Toggle light/dark">◐</button>
+      <button class="chip" id="langBtn" type="button">EN</button>
+    </div>
+  </div>
+
+  <section class="panel">
+    <label for="dob" data-i="lbl"></label>
+    <input type="datetime-local" id="dob" aria-describedby="err">
+    <p class="hint" data-i="hint"></p>
+    <p class="err" id="err" role="alert"></p>
+    <button class="go" id="go" type="button" data-i="go"></button>
+  </section>
+
+  <div id="out" hidden>
+    <section class="panel hero" aria-live="off">
+      <div class="big" id="y">0</div>
+      <div class="unit" data-i="years"></div>
+      <div class="rest" id="rest"></div>
+      <div class="live"><i></i><span data-i="live"></span></div>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><b id="sDays">0</b><span data-i="days"></span></div>
+      <div class="stat"><b id="sHours">0</b><span data-i="hours"></span></div>
+      <div class="stat"><b id="sMins">0</b><span data-i="mins"></span></div>
+      <div class="stat"><b id="sSecs">0</b><span data-i="secs"></span></div>
+    </div>
+
+    <section class="panel">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div id="tabBody" role="tabpanel" tabindex="0"></div>
+      <p class="note" data-i="note"></p>
+    </section>
+
+    <div class="actions">
+      <button class="chip" id="certBtn" type="button" data-i="certBtn"></button>
+      <button class="chip" id="shareBtn" type="button" data-i="share"></button>
+      <button class="chip" id="clearBtn" type="button" data-i="clear"></button>
+    </div>
+  </div>
+<section class="panel" id="people">
+    <h2 id="pplH" style="font-size:1.05rem;margin-bottom:10px"></h2>
+    <div class="actions" style="margin-bottom:10px">
+      <input type="text" id="pplName" maxlength="40" aria-labelledby="pplH" style="flex:2">
+      <button class="chip" id="pplSave" type="button"></button>
+    </div>
+    <p class="err" id="pplMsg" role="status"></p>
+    <ul id="pplList" style="list-style:none"></ul>
+    <div class="actions" style="margin-top:10px">
+      <button class="chip" id="pplExp" type="button"></button>
+      <button class="chip" id="pplImp" type="button"></button>
+      <button class="chip" id="pplNotif" type="button"></button>
+    </div>
+    <input type="file" id="pplFile" accept="application/json,.json" hidden>
+  </section>
+</main>
+
+<dialog id="certDlg" aria-labelledby="certH">
+  <h2 id="certH" data-i="certBtn"></h2>
+  <canvas id="cert" width="1200" height="800" role="img" aria-label="Certificate preview"></canvas>
+  <label for="certName" data-i="certName" style="margin-top:12px"></label>
+  <input type="text" id="certName" maxlength="40" autocomplete="name">
+  <p class="err" id="certMsg" role="alert"></p>
+  <div class="dlgActions">
+    <button class="go" id="certDl" type="button" data-i="certDl"></button>
+    <button class="chip" id="certClose" type="button" data-i="close"></button>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var DAY=86400000, YEAR=DAY*365.25;
+  var L={
+    bn:{title:"ChronoPulse",sub:"বয়স ও সময়ের হিসাব",lbl:"জন্ম তারিখ ও সময়",hint:"সময় না জানা থাকলে শুধু তারিখ দিন।",go:"বয়স হিসাব করুন",
+      years:"বছর",live:"লাইভ হিসাব চলছে",days:"মোট দিন",hours:"মোট ঘণ্টা",mins:"মোট মিনিট",secs:"মোট সেকেন্ড",
+      share:"ফলাফল শেয়ার",clear:"মুছে ফেলুন",copied:"ফলাফল কপি হয়েছে",
+      certBtn:"সার্টিফিকেট",certName:"নাম (ঐচ্ছিক)",certDl:"ছবি ডাউনলোড (PNG)",close:"বন্ধ করুন",cTitle:"বয়স সার্টিফিকেট",cFor:"এই সার্টিফিকেট প্রদান করা হলো",cBorn:"জন্মতারিখ",cIssued:"ইস্যুর তারিখ: ",certErr:"ফাইল সেভ করা যায়নি।",certNo:"এই ভিউতে ডাউনলোড চালু নেই।",
+      eEmpty:"জন্ম তারিখ নির্বাচন করুন।",eFuture:"ভবিষ্যতের তারিখ দেওয়া যাবে না। আজ বা তার আগের তারিখ দিন।",eOld:"তারিখটি অনেক পুরোনো। ১৯০০ সালের পরের তারিখ দিন।",
+      mo:"মাস",dy:"দিন",and:" ",
+      t:["রাশি ও বার","জীবনের হিসাব","অন্য গ্রহে","মহাকাশে"],
+      weekday:"জন্মবার",west:"পশ্চিমা রাশি",china:"চীনা রাশি",next:"পরবর্তী জন্মদিন",today:"আজই!",left:" দিন বাকি",
+      beats:"হৃদস্পন্দন",breaths:"শ্বাস",sleep:"ঘুমে কাটিয়েছেন",times:" বার",yrs:" বছর",
+      mercury:"বুধ",venus:"শুক্র",mars:"মঙ্গল",jupiter:"বৃহস্পতি",
+      sun:"সূর্য প্রদক্ষিণ",moon:"চন্দ্র মাস",light:"আলোর ভ্রমণ",ly:" আলোকবর্ষ",
+      note:"হৃদস্পন্দন, শ্বাস ও ঘুমের হিসাব গড় ধরে আনুমানিক। চীনা রাশি গ্রেগরিয়ান বছর ধরে হিসাব করা।",
+      wd:["রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"],
+      wz:["মকর","কুম্ভ","মীন","মেষ","বৃষ","মিথুন","কর্কট","সিংহ","কন্যা","তুলা","বৃশ্চিক","ধনু"],
+      cz:["বানর","মোরগ","কুকুর","শূকর","ইঁদুর","ষাঁড়","বাঘ","খরগোশ","ড্রাগন","সাপ","ঘোড়া","ভেড়া"],locale:"bn-BD"},
+    en:{title:"ChronoPulse",sub:"Age and time calculator",lbl:"Date and time of birth",hint:"If you don’t know the time, just enter the date.",go:"Calculate age",
+      years:"years",live:"Updating live",days:"Total days",hours:"Total hours",mins:"Total minutes",secs:"Total seconds",
+      share:"Share result",clear:"Clear",copied:"Result copied",
+      certBtn:"Certificate",certName:"Name (optional)",certDl:"Download image (PNG)",close:"Close",cTitle:"Certificate of Age",cFor:"Awarded to",cBorn:"Date of birth",cIssued:"Issued on ",certErr:"Couldn’t save the file.",certNo:"Downloads aren’t available in this view.",
+      eEmpty:"Select your date of birth.",eFuture:"Date of birth can’t be in the future. Choose today or an earlier date.",eOld:"That date is too far back. Choose a date after 1900.",
+      mo:"months",dy:"days",and:" ",
+      t:["Zodiac & day","Life stats","Other planets","In space"],
+      weekday:"Day of birth",west:"Western zodiac",china:"Chinese zodiac",next:"Next birthday",today:"Today!",left:" days left",
+      beats:"Heartbeats",breaths:"Breaths",sleep:"Time asleep",times:"",yrs:" years",
+      mercury:"Mercury",venus:"Venus",mars:"Mars",jupiter:"Jupiter",
+      sun:"Trips around the Sun",moon:"Lunar months",light:"Light has travelled",ly:" light-years",
+      note:"Heartbeat, breath and sleep figures are estimates based on averages. Chinese zodiac uses the Gregorian year.",
+      wd:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      wz:["Capricorn","Aquarius","Pisces","Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius"],
+      cz:["Monkey","Rooster","Dog","Pig","Rat","Ox","Tiger","Rabbit","Dragon","Snake","Horse","Goat"],locale:"en-US"}
+  };
+  var lang="bn", dob=null, tab=0, tick=null;
+  var $=function(id){return document.getElementById(id)};
+  var root=document.documentElement;
+  function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function fmt(n,d){return Number(n).toLocaleString(L[lang].locale,{maximumFractionDigits:d||0,minimumFractionDigits:d||0})}
+
+  // age as calendar years / months / days
+  function ymd(b,n){
+    var y=n.getFullYear()-b.getFullYear(), m=n.getMonth()-b.getMonth(), d=n.getDate()-b.getDate();
+    var nt=n.getHours()*3600+n.getMinutes()*60+n.getSeconds(), bt=b.getHours()*3600+b.getMinutes()*60+b.getSeconds();
+    if(nt<bt) d--;
+    if(d<0){m--; d+=new Date(n.getFullYear(),n.getMonth(),0).getDate();}
+    if(m<0){y--; m+=12;}
+    return {y:y,m:m,d:d};
+  }
+  function westIdx(d,m){ // 0 = Capricorn
+    var cut=[20,19,21,20,21,21,23,23,23,23,22,22];
+    return d>=cut[m-1] ? m%12 : (m-1)%12;
+  }
+  function nextBirthday(b,n){
+    var t0=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+    var nx=new Date(n.getFullYear(),b.getMonth(),b.getDate());
+    if(nx<t0) nx=new Date(n.getFullYear()+1,b.getMonth(),b.getDate());
+    return Math.round((nx-t0)/DAY);
+  }
+
+  function applyLang(){
+    var s=L[lang];
+    root.lang=lang;
+    document.querySelectorAll("[data-i]").forEach(function(el){el.textContent=s[el.getAttribute("data-i")]});
+    $("langBtn").textContent=lang==="bn"?"EN":"বাং";
+    if(typeof renderPeople==="function")renderPeople();
+    document.title="ChronoPulse – "+s.sub;
+    var tabs=$("tabs"); tabs.innerHTML="";
+    s.t.forEach(function(name,i){
+      var b=document.createElement("button");
+      b.className="tab"; b.type="button"; b.setAttribute("role","tab"); b.textContent=name;
+      b.setAttribute("aria-selected",i===tab); b.onclick=function(){tab=i;applyLang();update();};
+      tabs.appendChild(b);
+    });
+  }
+
+  function rows(list){return list.map(function(r){return '<div class="row"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>'}).join("")}
+
+  function update(){
+    if(!dob) return;
+    var now=new Date(), s=L[lang], ms=now-dob, a=ymd(dob,now), yrs=ms/YEAR, mins=Math.floor(ms/60000), days=Math.floor(ms/DAY);
+    $("y").textContent=fmt(a.y);
+    $("rest").textContent=fmt(a.m)+" "+s.mo+s.and+fmt(a.d)+" "+s.dy;
+    $("sDays").textContent=fmt(days); $("sHours").textContent=fmt(Math.floor(ms/3600000));
+    $("sMins").textContent=fmt(mins); $("sSecs").textContent=fmt(Math.floor(ms/1000));
+    var body="";
+    if(tab===0){
+      var left=nextBirthday(dob,now);
+      body=rows([[s.weekday,s.wd[dob.getDay()]],[s.west,s.wz[westIdx(dob.getDate(),dob.getMonth()+1)]],
+        [s.china,s.cz[((dob.getFullYear()%12)+12)%12]],[s.next,left===0?s.today:fmt(left)+s.left]]);
+    } else if(tab===1){
+      body=rows([[s.beats,fmt(mins*72)+s.times],[s.breaths,fmt(mins*16)+s.times],[s.sleep,fmt(yrs/3,1)+s.yrs]]);
+    } else if(tab===2){
+      body=rows([[s.mercury,fmt(yrs/0.2408,1)+s.yrs],[s.venus,fmt(yrs/0.6152,1)+s.yrs],[s.mars,fmt(yrs/1.8808,1)+s.yrs],[s.jupiter,fmt(yrs/11.862,1)+s.yrs]]);
+    } else {
+      body=rows([[s.sun,fmt(yrs,2)+s.times],[s.moon,fmt(days/29.53)+s.times],[s.light,fmt(yrs,1)+s.ly]]);
+    }
+    $("tabBody").innerHTML=body;
+  }
+
+  function showErr(k){ $("err").textContent=k?L[lang][k]:""; if(k){$("out").hidden=true; stop();} }
+  function stop(){ if(tick){clearInterval(tick);tick=null;} }
+
+  function run(celebrate){
+    var v=$("dob").value;
+    if(!v) return showErr("eEmpty");
+    var d=new Date(v), now=new Date();
+    if(isNaN(d)) return showErr("eEmpty");
+    if(d>now) return showErr("eFuture");
+    if(d.getFullYear()<1900) return showErr("eOld");
+    showErr(null); dob=d; store("cp-dob",v);
+    $("out").hidden=false; update(); stop(); tick=setInterval(update,250);
+    if(celebrate && typeof confetti==="function" && !matchMedia("(prefers-reduced-motion:reduce)").matches){
+      var bday=d.getDate()===now.getDate()&&d.getMonth()===now.getMonth();
+      if(bday) confetti({particleCount:140,spread:90,origin:{y:.7}});
+    }
+  }
+
+  function toast(msg){var t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2200)}
+
+  function share(){
+    if(!dob) return;
+    var s=L[lang], a=ymd(dob,new Date());
+    var txt="ChronoPulse: "+fmt(a.y)+" "+s.years+", "+fmt(a.m)+" "+s.mo+", "+fmt(a.d)+" "+s.dy+" | "+s.west+": "+s.wz[westIdx(dob.getDate(),dob.getMonth()+1)];
+    if(navigator.share){navigator.share({text:txt}).catch(function(){});return;}
+    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){toast(s.copied)},function(){toast(txt)});}
+    else toast(txt);
+  }
+
+  // certificate
+
+  function drawCert(){
+    var c=$("cert"),g=c.getContext("2d"),s=L[lang],n=new Date(),a=ymd(dob,n),yrs=(n-dob)/YEAR,days=Math.floor((n-dob)/DAY);
+    var acc=(getComputedStyle(root).getPropertyValue("--a-l")||"#0f766e").trim(),ink="#0f172a",mut="#566178";
+    var F="'Hind Siliguri','Noto Sans Bengali','Segoe UI',sans-serif";
+    g.fillStyle="#ffffff";g.fillRect(0,0,1200,800);
+    g.fillStyle=acc;g.fillRect(0,0,1200,14);
+    g.strokeStyle=ink;g.lineWidth=4;g.strokeRect(36,36,1128,728);
+    g.strokeStyle=acc;g.lineWidth=1.5;g.strokeRect(52,52,1096,696);
+    g.textAlign="center";g.textBaseline="alphabetic";
+    function T(t,y,sz,w,col,x){g.font=w+" "+sz+"px "+F;g.fillStyle=col;g.fillText(t,x||600,y);}
+    T("ChronoPulse",118,28,"700",acc);
+    T(s.cTitle,185,54,"700",ink);
+    var nm=$("certName").value.trim();
+    if(nm){T(s.cFor,245,24,"400",mut);T(nm,305,44,"700",ink);}
+    T(fmt(a.y)+" "+s.years,nm?435:400,96,"700",acc);
+    T(fmt(a.m)+" "+s.mo+"  "+fmt(a.d)+" "+s.dy,nm?490:455,34,"600",ink);
+    g.strokeStyle="#dde2eb";g.lineWidth=2;g.beginPath();g.moveTo(110,540);g.lineTo(1090,540);g.stroke();
+    var cols=[
+      [dob.toLocaleDateString(s.locale,{year:"numeric",month:"short",day:"numeric"}),s.cBorn],
+      [s.wz[westIdx(dob.getDate(),dob.getMonth()+1)],s.west],
+      [fmt(days),s.days],
+      [fmt(yrs,1),s.sun]
+    ];
+    cols.forEach(function(col,i){var x=210+i*260;T(col[0],603,30,"700",ink,x);T(col[1],640,20,"400",mut,x);});
+    T(s.cIssued+n.toLocaleDateString(s.locale,{year:"numeric",month:"long",day:"numeric"}),712,20,"400",mut);
+  }
+  async function openCert(){
+    if(!dob) return;
+    $("certMsg").textContent="";
+    try{await document.fonts.load("700 40px 'Hind Siliguri'");}catch(e){}
+    drawCert();
+    $("certDlg").showModal();
+  }
+  $("certBtn").onclick=openCert;
+  $("certName").addEventListener("input",drawCert);
+  $("certClose").onclick=function(){$("certDlg").close()};
+  $("certDl").onclick=function(){
+    $("certMsg").textContent="";
+    $("cert").toBlob(function(b){
+      if(!b){$("certMsg").textContent=L[lang].certErr;return;}
+      var f=new File([b],"chronopulse-age-certificate.png",{type:"image/png"});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(function(){});return;}
+      var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
+    },"image/png");
+  };
+
+  // accent swatches
+  [["teal","#0f766e"],["indigo","#4338ca"],["rose","#be123c"],["amber","#b45309"]].forEach(function(c){
+    var b=document.createElement("button"); b.type="button"; b.className="sw"; b.style.background=c[1];
+    b.setAttribute("aria-label",c[0]); b.setAttribute("aria-pressed","false"); b.dataset.c=c[0];
+    b.onclick=function(){setAccent(c[0]);store("cp-accent",c[0]);};
+    $("swatches").appendChild(b);
+  });
+  function setAccent(c){
+    if(c==="teal") root.removeAttribute("data-accent"); else root.setAttribute("data-accent",c);
+    document.querySelectorAll(".sw").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.c===c)});
+  }
+
+  $("go").onclick=function(){run(true)};
+  $("dob").addEventListener("keydown",function(e){if(e.key==="Enter")run(true)});
+  $("langBtn").onclick=function(){lang=lang==="bn"?"en":"bn";store("cp-lang",lang);applyLang();update();if($("err").textContent)run(false);};
+  $("modeBtn").onclick=function(){
+    var dark=root.getAttribute("data-theme")==="dark"||(!root.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);
+    var n=dark?"light":"dark"; root.setAttribute("data-theme",n); store("cp-theme",n);
+  };
+  $("shareBtn").onclick=share;
+  $("clearBtn").onclick=function(){stop();dob=null;$("dob").value="";$("out").hidden=true;showErr(null);store("cp-dob","");};
+
+  // saved people, backup, reminders
+  var P={bn:{h:"সংরক্ষিত ব্যক্তি",ph:"নাম লিখুন",save:"সংরক্ষণ",exp:"এক্সপোর্ট",imp:"ইমপোর্ট",notif:"রিমাইন্ডার",empty:"এখনো কেউ নেই। বয়স হিসাব করে নাম দিয়ে সংরক্ষণ করুন।",del:"মুছুন",today:"আজ জন্মদিন!",left:" দিন পরে জন্মদিন",bad:"ফাইলটি সঠিক নয়।",ok:"সংরক্ষিত হয়েছে।",need:"আগে বয়স হিসাব করুন ও নাম লিখুন।",nOn:"জন্মদিনের রিমাইন্ডার চালু হয়েছে।",nOff:"নোটিফিকেশনের অনুমতি পাওয়া যায়নি।"},
+    en:{h:"Saved people",ph:"Enter a name",save:"Save",exp:"Export",imp:"Import",notif:"Reminders",empty:"No one saved yet. Calculate an age, add a name and save it.",del:"Delete",today:"Birthday today!",left:" days to birthday",bad:"That file isn’t valid.",ok:"Saved.",need:"Calculate an age and enter a name first.",nOn:"Birthday reminders are on.",nOff:"Notification permission wasn’t granted."}};
+  var people=[];try{people=JSON.parse(load("cp-people")||"[]")}catch(e){}
+  if(!Array.isArray(people)) people=[];
+  function savePeople(){store("cp-people",JSON.stringify(people))}
+  function pmsg(k){$("pplMsg").textContent=k?P[lang][k]:""}
+  function renderPeople(){
+    var p=P[lang],ul=$("pplList");
+    $("pplH").textContent=p.h;$("pplName").placeholder=p.ph;$("pplSave").textContent=p.save;$("pplExp").textContent=p.exp;$("pplImp").textContent=p.imp;$("pplNotif").textContent=p.notif;
+    ul.innerHTML="";
+    if(!people.length){var e=document.createElement("li");e.className="note";e.textContent=p.empty;ul.appendChild(e);return;}
+    people.forEach(function(x,i){
+      var b=new Date(x.d),n=new Date(),a=ymd(b,n),left=nextBirthday(b,n);
+      var li=document.createElement("li");li.className="ppl";
+      var o=document.createElement("button");o.type="button";o.className="open";
+      var t=document.createElement("b");t.textContent=x.n+" – "+fmt(a.y)+" "+L[lang].years;
+      var sm=document.createElement("small");sm.textContent=left===0?p.today:fmt(left)+p.left;
+      o.appendChild(t);o.appendChild(sm);
+      o.onclick=function(){$("dob").value=x.d;run(false);window.scrollTo(0,0)};
+      var d=document.createElement("button");d.type="button";d.className="chip";d.textContent=p.del;
+      d.onclick=function(){people.splice(i,1);savePeople();renderPeople()};
+      li.appendChild(o);li.appendChild(d);ul.appendChild(li);
+    });
+  }
+  function fileOut(blob,name){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},4000)}
+  $("pplSave").onclick=function(){
+    var nm=$("pplName").value.trim(),v=$("dob").value;
+    if(!nm||!v||!dob){pmsg("need");return;}
+    people.push({n:nm.slice(0,40),d:v});savePeople();$("pplName").value="";renderPeople();pmsg("ok");
+  };
+  $("pplExp").onclick=function(){fileOut(new Blob([JSON.stringify(people)],{type:"application/json"}),"chronopulse-people.json")};
+  $("pplImp").onclick=function(){$("pplFile").click()};
+  $("pplFile").onchange=function(){
+    var f=this.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var list=JSON.parse(r.result);if(!Array.isArray(list))throw 0;
+        list=list.filter(function(x){return x&&typeof x.n==="string"&&typeof x.d==="string"&&!isNaN(new Date(x.d))}).map(function(x){return{n:x.n.slice(0,40),d:x.d}});
+        people=people.concat(list).slice(0,500);savePeople();renderPeople();pmsg("ok");
+      }catch(e){pmsg("bad")}
+    };
+    r.readAsText(f);this.value="";
+  };
+  $("pplNotif").onclick=function(){
+    if(!("Notification" in window)){pmsg("nOff");return;}
+    Notification.requestPermission().then(function(s){pmsg(s==="granted"?"nOn":"nOff");checkBdays();});
+  };
+  function checkBdays(){
+    if(!("Notification" in window)||Notification.permission!=="granted"||!navigator.serviceWorker)return;
+    var key=new Date().toDateString();if(load("cp-notified")===key)return;
+    var names=people.filter(function(x){return nextBirthday(new Date(x.d),new Date())===0}).map(function(x){return x.n});
+    if(!names.length)return;
+    store("cp-notified",key);
+    navigator.serviceWorker.ready.then(function(r){r.showNotification("ChronoPulse",{body:names.join(", ")+" – "+P[lang].today,icon:"icon-192.png"})});
+  }
+
+  // init
+  var now=new Date(), pad=function(n){return String(n).padStart(2,"0")};
+  $("dob").max=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+"T"+pad(now.getHours())+":"+pad(now.getMinutes());
+  $("dob").min="1900-01-01T00:00";
+  var sl=load("cp-lang"); if(sl==="en"||sl==="bn") lang=sl;
+  var st=load("cp-theme"); if(st==="light"||st==="dark") root.setAttribute("data-theme",st);
+  setAccent(load("cp-accent")||"teal");
+  applyLang();
+  var sd=load("cp-dob"); if(sd){$("dob").value=sd;run(false);}
+  renderPeople();checkBdays();
+  if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0)navigator.serviceWorker.register("sw.js").catch(function(){});
+})();
+</script>
+</body>
+</html>
