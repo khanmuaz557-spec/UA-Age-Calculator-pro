@@ -344,7 +344,6 @@ dialog input[type=text]{width:100%;min-height:44px;padding:8px 12px;border:1px s
     $("cert").toBlob(function(b){
       if(!b){$("certMsg").textContent=L[lang].certErr;return;}
       var f=new File([b],"chronopulse-age-certificate.png",{type:"image/png"});
-      if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(function(){});return;}
       var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
     },"image/png");
   };
